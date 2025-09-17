@@ -24,13 +24,14 @@ function handleSubmission(event) {
     const taskName = document.getElementById("taskName").value;
     const taskDescription = document.getElementById("taskDescription").value;
     const taskDeadline = document.getElementById("taskDeadline").value;
+    const taskCompletion = false;
 
     // TODO: Validate input fields
     if(taskName == "" || taskDescription == ""){
         alert("Task name and Description is required!");
     }
     // TODO: Update the tasks array
-    tasks.push({name: taskName, description: taskDescription, deadline: taskDeadline});
+    tasks.push({name: taskName, description: taskDescription, deadline: taskDeadline, completion: taskCompletion});
     render();
 }
 
@@ -42,8 +43,10 @@ function render() {
         <td>${task.name}</td>
         <td>${task.description}</td>
         <td>${task.deadline}</td>
-        <td><button onclick="markTaskComplete(this)">Complete</button></td>
-        <td><button onclick="removeTask(this)">Remove</button></td>
+        ${task.completion 
+            ? `<td colspan="2">Task Complete</td>` 
+            : `<td><button onclick="markTaskComplete(this)">Complete</button></td>
+              <td><button onclick="removeTask(this)">Remove</button></td>`}
         </tr>
         `).join('');
 }
@@ -58,22 +61,35 @@ function init() {
 // EFunction to handle complete button
 function markTaskComplete(button){
     const row = button.closest('tr');
-    const task = tasks[row.rowIndex - 1]
-    row.innerHTML = `
-        <td>${task.name}</td>
-        <td>${task.description}</td>
-        <td>${task.deadline}</td>
-        <td>Task Complete</td>
-        `
-    tasks[row.rowIndex - 1].remove()
-    render()
+    
+    const allRows = Array.from(taskTable.querySelectorAll('tr'));
+    const taskIndex = allRows.indexOf(row);
+    
+    console.log("Task index:", taskIndex);
+    console.log("Tasks array:", tasks);
+    
+    if (taskIndex >= 0 && tasks[taskIndex]) {
+        const task = tasks[taskIndex];
+        task.completion = true;
+        render();
+    } else {
+        console.error("Task not found at index:", taskIndex);
+    }
 }
 
 // Function to handle remove button
 function removeTask(button){
     const row = button.closest('tr');
-    tasks.splice(row.index, 1);
-    render();
+    
+    const allRows = Array.from(taskTable.querySelectorAll('tr'));
+    const taskIndex = allRows.indexOf(row);
+    
+    if (taskIndex >= 0 && tasks[taskIndex]) {
+        tasks.splice(taskIndex, 1);
+        render();
+    } else {
+        console.error("Task not found at index:", taskIndex);
+    }
 }
 
 // Event listener for form submission
